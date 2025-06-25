@@ -1,5 +1,5 @@
 from django.views import View
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 from django.urls import reverse
 import bcrypt
@@ -12,13 +12,27 @@ def index(request):
     return HttpResponseRedirect(reverse("login"))
 
 class ProfileView(View):
-    def get(self, request):
-        print(request.user)
-        return render(request, "users/profile.html", {"user": request.user})
-    
+    def get(self, request, user_id):
+        # vulnerability 3: not checking that the currently logged in user can access the profile at url /profile/<user_id>
+        # https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+        if not request.session.get("user_id"):
+            return HttpResponseRedirect(reverse("login"))
+
+        # vulnerability 3 is fixed by checking that the user defined in the url is the same as the logged in user
+        if request.session.get("user_id") != user_id:
+            return HttpResponseForbidden()
+            
+        user = UnsafeUser.objects.get(pk=user_id)
+        return render(request, "users/profile.html", {"user": user})
+        
     def post(self, request):
         pass
         # TODO: update profile description
+
+class LogoutView(View):
+    def post(self, request):
+        request.session.flush()
+        return HttpResponseRedirect(reverse("login"))
 
 class LoginView(View):
     def get(self, request):
@@ -36,8 +50,8 @@ class LoginView(View):
         # Login checks for either a plaintext password or crypted one, so that the fixing vulnerability 2 can be demonstrated.
         if password_encoded == user.password_hash or bcrypt.checkpw(password_encoded, user.password_hash):
             print("passwords match!")
-            request.session["user"] = user.username
-            return HttpResponseRedirect(reverse("profile"))
+            request.session["user_id"] = user.id
+            return HttpResponseRedirect(reverse("profile", args=(user.id,)))
         else:
             print("password wrong!")
             return render(request, "users/login.html", {"error": "Wrong username or password."})
@@ -52,11 +66,12 @@ class SignupView(View):
         lowercase = re.search("[a-z]", password)
         uppercase = re.search("[A-Z]", password)
         numbers = re.search("[0-9]", password) 
+        special = re.search("[^\w]", password)
 
         # vulnerability 1: Weak passwords can be used. https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
         # return True
         # vulnerability 1 is fixed by requiring passwords to be complex enough.
-        return long_enough and lowercase and uppercase and numbers
+        return long_enough and lowercase and uppercase and numbers and special
 
     def post(self, request):
         username = request.POST.get("username")
@@ -77,10 +92,4 @@ class SignupView(View):
             
             return render(request, "users/login.html", {"success": "Account created succesfully! Login with your credentials."})
         else:
-            return render(request, "users/signup.html", {"error": "Password must be atleast 8 characters long and contain numbers, lowercase and uppercase characters."})
-        
-
-    
-# logout
-# session tyhjäys
-# request.session.flush() 
+            return render(request, "users/signup.html", {"error": "Password must be atleast 8 characters long and contain special characters, numbers, lowercase and uppercase characters."})
