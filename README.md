@@ -8,6 +8,7 @@
 5. [Security_Logging_and_Monitoring_Failures](https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/): user logins are not logged
 
 ## How to run application
-1. Setup database: ```python manage.py migrate```
-2. Run application: ```python manage.py runserver```
-3. Open http://127.0.0.1:8000/
+1. install bcrypt ```pip install bcrypt```
+2. Setup database: ```python manage.py migrate```
+3. Run application: ```python manage.py runserver```
+4. Open http://127.0.0.1:8000/
