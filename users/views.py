@@ -25,9 +25,14 @@ class ProfileView(View):
         user = UnsafeUser.objects.get(pk=user_id)
         return render(request, "users/profile.html", {"user": user})
         
-    def post(self, request):
-        pass
-        # TODO: update profile description
+    def post(self, request, user_id):
+        user = UnsafeUser.objects.get(pk=user_id)
+        new_description = request.POST.get("description")
+        
+        user.description = new_description
+        user.save()
+
+        return HttpResponseRedirect(reverse("profile", args=(user.id,)))
 
 class LogoutView(View):
     def post(self, request):

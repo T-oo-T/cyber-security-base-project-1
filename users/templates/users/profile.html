@@ -7,4 +7,22 @@
         <button type="submit">Logout</button>
     </form>
 </div>
+<br>
+<div>
+    <form action="{% url 'profile' user.id %}" method="post">
+        {% csrf_token %}
+        <div>
+            <label for="description">Edit description</label><br>
+            <textarea name="description">{{ user.description }}</textarea>
+        </div>
+
+        <button type="submit">Save changes</button>
+    </form>
+    <br>
+    <label for="description">Description</label>
+    <!-- vulnerability 4: user input is not sanitized, https://owasp.org/Top10/A03_2021-Injection/ -->
+    <div>{{ user.description | safe }}</div>
+    <!-- vulnerability 4 is fixed by using normal django template processing which removes xss by default -->
+    <!--<div>{{ user.description }}</div>-->
+</div>
 {% endblock %}
