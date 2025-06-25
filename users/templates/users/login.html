@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="/login" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <h2>Login</h2>
+        {% if error %}
+        <p style="color:red;">{{ error }}</p>
+        {% endif %}
+        {% if success %}
+        <p style="color:green;">{{ success }}</p>
+        {% endif %}
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username">
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <input type="submit" value="Login">
+        <p>No account? <a href="/signup">Create new account here</a></p>
+    </fieldset>
+</form>
+{% endblock %}
