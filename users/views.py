@@ -13,14 +13,14 @@ def index(request):
 
 class ProfileView(View):
     def get(self, request, user_id):
-        # vulnerability 3: not checking that the currently logged in user can access the profile at url /profile/<user_id>
-        # https://owasp.org/Top10/A01_2021-Broken_Access_Control/
         if not request.session.get("user_id"):
             return HttpResponseRedirect(reverse("login"))
-
+        
+        # vulnerability 3: not checking that the currently logged in user can access the profile at url /profile/<user_id>
+        # https://owasp.org/Top10/A01_2021-Broken_Access_Control/
         # vulnerability 3 is fixed by checking that the user defined in the url is the same as the logged in user
-        if request.session.get("user_id") != user_id:
-            return HttpResponseForbidden()
+        # if request.session.get("user_id") != user_id:
+        #    return HttpResponseForbidden()
             
         user = UnsafeUser.objects.get(pk=user_id)
         return render(request, "users/profile.html", {"user": user})
@@ -58,7 +58,7 @@ class LoginView(View):
             # vulnerability 5: user logins are not logged, https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
             # vulnerability 5 is fixed by logging user logins
             # ideally all actions should be logged, logging only the login is done here for keeping the example simple.
-            UserAudit.objects.create(user_id=user)
+            # UserAudit.objects.create(user_id=user)
             return HttpResponseRedirect(reverse("profile", args=(user.id,)))
         else:
             return render(request, "users/login.html", {"error": "Wrong username or password."})
@@ -76,9 +76,9 @@ class SignupView(View):
         special = re.search("[^\w]", password)
 
         # vulnerability 1: Weak passwords can be used. https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
-        # return True
+        return True
         # vulnerability 1 is fixed by requiring passwords to be complex enough.
-        return long_enough and lowercase and uppercase and numbers and special
+        # return long_enough and lowercase and uppercase and numbers and special
 
     def post(self, request):
         username = request.POST.get("username")
