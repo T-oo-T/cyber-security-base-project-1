@@ -9,5 +9,5 @@
 
 ## How to run application
 1. Setup database: ```python manage.py migrate```
-2. Run application: ```python manage.py runserver````
+2. Run application: ```python manage.py runserver```
 3. Open http://127.0.0.1:8000/
