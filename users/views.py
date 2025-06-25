@@ -54,7 +54,6 @@ class LoginView(View):
         
         # Login checks for either a plaintext password or crypted one, so that the fixing vulnerability 2 can be demonstrated.
         if password_encoded == user.password_hash or bcrypt.checkpw(password_encoded, user.password_hash):
-            print("passwords match!")
             request.session["user_id"] = user.id
             # vulnerability 5: user logins are not logged, https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
             # vulnerability 5 is fixed by logging user logins
@@ -62,7 +61,6 @@ class LoginView(View):
             UserAudit.objects.create(user_id=user)
             return HttpResponseRedirect(reverse("profile", args=(user.id,)))
         else:
-            print("password wrong!")
             return render(request, "users/login.html", {"error": "Wrong username or password."})
 
 
