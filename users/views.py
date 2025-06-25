@@ -6,7 +6,7 @@ import bcrypt
 import re
 
 
-from .models import UnsafeUser
+from .models import UnsafeUser, UserAudit
 
 def index(request):
     return HttpResponseRedirect(reverse("login"))
@@ -56,6 +56,10 @@ class LoginView(View):
         if password_encoded == user.password_hash or bcrypt.checkpw(password_encoded, user.password_hash):
             print("passwords match!")
             request.session["user_id"] = user.id
+            # vulnerability 5: user logins are not logged, https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
+            # vulnerability 5 is fixed by logging user logins
+            # ideally all actions should be logged, logging only the login is done here for keeping the example simple.
+            UserAudit.objects.create(user_id=user)
             return HttpResponseRedirect(reverse("profile", args=(user.id,)))
         else:
             print("password wrong!")
