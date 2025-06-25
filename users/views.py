@@ -75,11 +75,12 @@ class SignupView(View):
         numbers = re.search("[0-9]", password) 
         special = re.search("[^\w]", password)
 
-        # vulnerability 1: Weak passwords can be used. https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
-        return True
         # vulnerability 1 is fixed by requiring passwords to be complex enough.
         # return long_enough and lowercase and uppercase and numbers and special
 
+        # vulnerability 1: Weak passwords can be used. https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+        return True
+        
     def post(self, request):
         username = request.POST.get("username")
         password = request.POST.get("password")
